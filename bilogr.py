@@ -70,8 +70,8 @@ class Model:
         bw_cell = rnn_cell.LSTMCell(self.num_hidden)
         bw_cell = rnn_cell.DropoutWrapper(bw_cell, output_keep_prob=self.dropout)
 
-        fw_cell = rnn_cell.MultiRNNCell([fw_cell] * 2)
-        bw_cell = rnn_cell.MultiRNNCell([bw_cell] * 2)
+        fw_cell = rnn_cell.MultiRNNCell([fw_cell] * 3)
+        bw_cell = rnn_cell.MultiRNNCell([bw_cell] * 3)
 
         x = tf.transpose(self.data, [1, 0, 2])
         x = tf.reshape(x, [-1, 1])
@@ -132,13 +132,13 @@ if __name__ == '__main__' :
     target = tf.placeholder(tf.float32, [None, 2])
     dropout = tf.placeholder(tf.float32)
     EPOCH = 100000
-    BATCH_SIZE = 512
+    BATCH_SIZE = 128
     train_input, train_output = get_input()
     train_input = transform_pca(nf,train_input)
 
     NUM_EXAMPLES = len(train_input)
     no_of_batches = int(NUM_EXAMPLES) / BATCH_SIZE
-    model = Model(data,target,10,dropout)
+    model = Model(data,target,24,dropout)
     init_op = tf.initialize_all_variables()
     sess = tf.Session()
     saver = tf.train.Saver()
@@ -157,7 +157,7 @@ if __name__ == '__main__' :
         for j in range(no_of_batches):
             inp, out = train_input[ptr:ptr+BATCH_SIZE], train_output[ptr:ptr+BATCH_SIZE]
             ptr+=BATCH_SIZE
-            sess.run(model.optimize,{data: inp, target: out, dropout: 1})
+            sess.run(model.optimize,{data: inp, target: out, dropout: 0.5})
         print i+1
         if i % 10 == 0:
             error = sess.run(model.cost,{data: train_input, target: train_output, dropout: 1})
